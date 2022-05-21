@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  app_fintech:
+  app_newsletter:
     build:
       context: .
       target: dev

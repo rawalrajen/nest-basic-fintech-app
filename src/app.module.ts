@@ -9,6 +9,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './logger/logging.interceptor';
 import { DatabaseModule } from './database/database.module';
 import { QueueModule } from './queue/queue.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { QueueModule } from './queue/queue.module';
     QueueModule,
     AppLoggerModule,
     UserModule,
+    TransactionModule,
   ],
   exports: [AppLoggerModule, ConfigModule],
   controllers: [AppController],
