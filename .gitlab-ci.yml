@@ -1,0 +1,71 @@
+stages:
+  - install-dependencies
+  - build
+  - deploy
+
+cache:
+  key: '$CI_JOB_NAME-$CI_COMMIT_REF_SLUG'
+
+install-dependencies-app:
+  stage: install-dependencies
+  image: registry.maximilianmadl.de:5005/listinfo/business-solutions/chat/chat-service:baseImage
+  script:
+    - yarn install
+  tags:
+    - libs-node
+  only:
+    refs:
+      - develop
+      - staging
+  artifacts:
+    paths:
+      - node_modules
+    expire_in: 1 days
+    when: always
+  cache:
+    paths:
+      - node_modules
+
+dev-deploy:
+  stage: deploy
+  dependencies:
+    - install-dependencies-app
+  script:
+    - cp .env.dev .env
+    - docker login $CI_REGISTRY -u gitlab-ci-token -p $CI_JOB_TOKEN
+    - COMPOSE_HTTP_TIMEOUT=200 docker-compose -f docker-compose.dev.yml down && docker-compose -f docker-compose.dev.yml up -d
+  environment:
+    name: development
+    url: ${DEV_PROJECT_URL}
+  tags:
+    - lbs-api-deploy
+  only:
+    - develop
+
+staging-deploy:
+  stage: deploy
+  dependencies:
+    - install-dependencies-app
+  script:
+    - cp .env.stg .env
+    - docker login $CI_REGISTRY -u gitlab-ci-token -p $CI_JOB_TOKEN
+    - docker-compose -f docker-compose.stg.yml down && docker-compose -f docker-compose.stg.yml up -d
+  environment:
+    name: staging
+    url: ${STAGE_PROJECT_URL}
+  tags:
+    - lbs-staging-deploy
+  only:
+    - staging
+
+deploy-production:
+  stage: deploy
+  tags:
+    - listinfo-production
+  only:
+    - release
+  script:
+    - cd deploy
+    - ansible-playbook -i inventory main.yml --tags production --limit app-prod
+
+

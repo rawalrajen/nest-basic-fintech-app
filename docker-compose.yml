@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  app_fintech:
+    build:
+      context: .
+      target: dev
+    restart: on-failure
+    volumes:
+      - .env.docker:/app/.env
+      - ./:/app
+      - node_modules:/app/node_modules/
+    ports:
+      - '8088:3000'
+    networks:
+      - rosebay_fintech
+    depends_on:
+      - mysql_fintech
+      - mysql_fintech_test
+    links:
+      - mysql_fintech
+      - mysql_fintech_test
+  mysql_fintech:
+    image: mysql:8.0.23
+    ports:
+      - '5555:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=fintech
+      - MYSQL_USER=fintech
+      - MYSQL_PASSWORD=fintech@123
+    networks:
+      - rosebay_fintech
+    volumes:
+      - mysqldata:/var/lib/mysql
+  mysql_fintech_test:
+    image: mysql:8.0.23
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=fintech
+      - MYSQL_USER=fintech
+      - MYSQL_PASSWORD=fintech@123
+networks:
+  rosebay_fintech:
+volumes:
+  node_modules:
+  mysqldata:
