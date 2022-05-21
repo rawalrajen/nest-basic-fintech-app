@@ -10,6 +10,7 @@ import { LoggingInterceptor } from './logger/logging.interceptor';
 import { DatabaseModule } from './database/database.module';
 import { QueueModule } from './queue/queue.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
+import { TransferModule } from './modules/transfer/transfer.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TransactionModule } from './modules/transaction/transaction.module';
     AppLoggerModule,
     UserModule,
     TransactionModule,
+    TransferModule,
   ],
   exports: [AppLoggerModule, ConfigModule],
   controllers: [AppController],

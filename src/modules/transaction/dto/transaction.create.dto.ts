@@ -1,4 +1,5 @@
 import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
+import { TransactionType } from '../transaction.entity';
 
 export class TransactionCreateDto {
   @IsNotEmpty()
@@ -9,6 +10,6 @@ export class TransactionCreateDto {
   @IsNumber()
   user_id: number;
 
-  @IsEnum(['in', 'out'])
+  @IsEnum(TransactionType)
   type: string;
 }

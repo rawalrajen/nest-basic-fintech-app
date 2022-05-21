@@ -1,21 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { TransactionRepository } from '../repositories/transaction.repository';
+import { TransferRepository } from '../repositories/transfer.repository';
 import { Request } from 'express';
 import { AppLogger } from '../../../logger/logger.service';
 import { Between, Like } from 'typeorm';
-import { TransactionAction, TransactionType } from '../transaction.entity';
 import { ApiException } from '../../../exceptions/api.exception';
 
 @Injectable()
-export class TransactionService {
+export class TransferService {
   constructor(
-    private repository: TransactionRepository,
+    private repository: TransferRepository,
     private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(TransactionService.name);
+    this.logger.setContext(TransferService.name);
   }
 
-  async getPaginatedTransactions(request: Request, queries) {
+  async getPaginatedtransfers(request: Request, queries) {
     const page = parseInt(queries.page, 10) || 1;
     const pageSize = parseInt(queries.pageSize, 10) || 10;
     const filterBody = await this.searchConditions(queries);
@@ -42,7 +41,6 @@ export class TransactionService {
 
   async store(body): Promise<{ article: any }> {
     try {
-      body.action = this.getTransactionAction(body.type);
       return await this.repository.save(body);
     } catch (e) {
       this.logger.error(body, e.message);
@@ -80,17 +78,5 @@ export class TransactionService {
       to: data.page * data.pageSize,
       total: data.count,
     };
-  }
-
-  getTransactionAction(type) {
-    if (type === TransactionType.IN) {
-      return TransactionAction.DEPOSIT;
-    }
-
-    if (type === TransactionType.OUT) {
-      return TransactionAction.WITHDRAW;
-    }
-
-    throw new ApiException('Invalid transaction type', 400);
   }
 }

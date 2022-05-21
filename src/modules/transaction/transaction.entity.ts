@@ -5,8 +5,17 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-export type TransactionType = 'in' | 'out';
-export type TransactionAction = 'deposit' | 'withdraw' | 'transfer';
+
+export enum TransactionAction {
+  DEPOSIT = 'deposit',
+  WITHDRAW = 'withdraw',
+  TRANSFER = 'transfer',
+}
+
+export enum TransactionType {
+  IN = 'in',
+  OUT = 'out',
+}
 
 @Entity()
 export class Transaction {
@@ -21,15 +30,15 @@ export class Transaction {
 
   @Column({
     type: 'enum',
-    enum: ['in', 'out', 'transfer'],
-    default: 'in',
+    enum: TransactionType,
+    default: TransactionType.IN,
   })
   type: TransactionType;
 
   @Column({
     type: 'enum',
-    enum: ['deposit', 'withdraw', 'transfer'],
-    default: 'deposit',
+    enum: TransactionAction,
+    default: TransactionAction.DEPOSIT,
   })
   action: TransactionAction;
 
