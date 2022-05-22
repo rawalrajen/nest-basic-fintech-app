@@ -42,7 +42,10 @@ export class TransactionService {
 
   async store(requestBody): Promise<{ article: any }> {
     try {
-      await this.checkUserHasSufficientBalance(requestBody);
+      if (requestBody.type === TransactionType.OUT) {
+        const { user_id, amount } = requestBody;
+        await this.checkUserHasSufficientBalance(user_id, amount);
+      }
       requestBody.action = this.getTransactionAction(requestBody.type);
       return await this.repository.save(requestBody);
     } catch (e) {
@@ -83,18 +86,16 @@ export class TransactionService {
     };
   }
 
-  async checkUserHasSufficientBalance(requestBody) {
-    if (requestBody.type === TransactionType.OUT) {
-      const userBalance = await this.repository.getBalanceByUser(
-        requestBody.user_id,
+  async checkUserHasSufficientBalance(userId: number, withdrawlAmount: number) {
+    const userBalance = await this.repository.getBalanceByUser(userId);
+
+    if (withdrawlAmount > userBalance) {
+      throw new ApiException(
+        'Not sufficient balance to withdraw',
+        HttpStatus.BAD_REQUEST,
       );
-      if (requestBody.amount > userBalance) {
-        throw new ApiException(
-          'Not sufficient balance to withdraw',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
     }
+
     return true;
   }
 

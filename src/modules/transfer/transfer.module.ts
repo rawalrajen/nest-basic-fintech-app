@@ -9,15 +9,19 @@ import { ConfigModule } from '@nestjs/config';
 import { CommissionService } from './services/commission.service';
 import { CommissionRepository } from './repositories/commission.repository';
 import { CommissionController } from './controllers/commission.controller';
+import { TransactionService } from '../transaction/services/transaction.service';
+import { TransactionModule } from '../transaction/transaction.module';
+import { TransactionRepository } from '../transaction/repositories/transaction.repository';
 
 @Module({
   imports: [
     AppLoggerModule,
-    TypeOrmModule.forFeature([TransferRepository, CommissionRepository]),
+    TypeOrmModule.forFeature([TransferRepository, CommissionRepository, TransactionRepository]),
     QueueModule,
     ConfigModule,
+    TransactionModule,
   ],
-  providers: [TransferService, CommissionService],
+  providers: [TransferService, CommissionService, TransactionService],
   controllers: [TransferController, CommissionController],
   exports: [TransferService, CommissionService],
 })

@@ -4,12 +4,14 @@ import { Request } from 'express';
 import { AppLogger } from '../../../logger/logger.service';
 import { Between, Like } from 'typeorm';
 import { ApiException } from '../../../exceptions/api.exception';
+import { TransactionService } from '../../transaction/services/transaction.service';
 
 @Injectable()
 export class TransferService {
   constructor(
     private repository: TransferRepository,
     private readonly logger: AppLogger,
+    private transactionService: TransactionService,
   ) {
     this.logger.setContext(TransferService.name);
   }
@@ -41,10 +43,14 @@ export class TransferService {
 
   async store(body): Promise<{ article: any }> {
     try {
+      await this.transactionService.checkUserHasSufficientBalance(
+        body.from_user_id,
+        body.amount,
+      );
       return await this.repository.save(body);
     } catch (e) {
       this.logger.error(body, e.message);
-      throw new ApiException(e.message, e.code);
+      throw new ApiException(e.message, e.status);
     }
   }
 
