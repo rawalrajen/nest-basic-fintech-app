@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Transaction } from '../transaction/transaction.entity';
 export type UserStatus = 'active' | 'inactive';
 
 @Entity()
@@ -30,4 +32,7 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.actor)
+  transactions: Transaction[];
 }

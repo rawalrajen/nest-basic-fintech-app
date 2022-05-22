@@ -8,6 +8,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Transfer } from '../transfer/transfer.entity';
+import { User } from '../user/user.entity';
 
 export enum TransactionAction {
   DEPOSIT = 'deposit',
@@ -57,4 +58,8 @@ export class Transaction {
   @ManyToOne(() => Transfer, (transfer) => transfer.transactions)
   @JoinColumn({ name: 'transfer_id' })
   transfer: Transfer;
+
+  @ManyToOne(() => User, (user) => user.transactions, { eager: false })
+  @JoinColumn({ name: 'user_id' })
+  actor: User;
 }

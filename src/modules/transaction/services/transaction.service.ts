@@ -5,6 +5,8 @@ import { AppLogger } from '../../../logger/logger.service';
 import { Between, Like } from 'typeorm';
 import { TransactionAction, TransactionType } from '../transaction.entity';
 import { ApiException } from '../../../exceptions/api.exception';
+import { TransactionDto } from '../dto/transaction.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class TransactionService {
@@ -15,39 +17,52 @@ export class TransactionService {
     this.logger.setContext(TransactionService.name);
   }
 
-  async getPaginatedTransactions(request: Request, queries) {
+  async getPaginatedTransactions(
+    request: Request,
+    queries,
+  ): Promise<{ data: TransactionDto[]; meta: any }> {
     const page = parseInt(queries.page, 10) || 1;
     const pageSize = parseInt(queries.pageSize, 10) || 10;
     const filterBody = await this.searchConditions(queries);
 
-    const [users, count] = await this.repository.findAndCount({
+    const [transactions, count] = await this.repository.findAndCount({
       where: filterBody,
       relations: [],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-    const data = {
+    const paginationMeta = {
       page,
       pageSize,
       count,
     };
-    const meta = await this.pagination(data);
-    return { users, meta };
+    const data = plainToInstance(TransactionDto, transactions, {
+      excludeExtraneousValues: true,
+    });
+    const meta = await this.pagination(paginationMeta);
+    return { data, meta };
   }
 
-  async find(request: Request, id: number): Promise<{ articles: any }> {
-    const articles = await this.repository.getById(id);
-    return { articles };
+  async find(request: Request, id: number): Promise<TransactionDto> {
+    const transaction = await this.repository.getById(id);
+
+    return plainToInstance(TransactionDto, transaction, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  async store(requestBody): Promise<{ article: any }> {
+  async store(requestBody): Promise<TransactionDto> {
     try {
       if (requestBody.type === TransactionType.OUT) {
         const { user_id, amount } = requestBody;
         await this.checkUserHasSufficientBalance(user_id, amount);
       }
       requestBody.action = this.getTransactionAction(requestBody.type);
-      return await this.repository.save(requestBody);
+      const transaction = await this.repository.save(requestBody);
+
+      return plainToInstance(TransactionDto, transaction, {
+        excludeExtraneousValues: true,
+      });
     } catch (e) {
       this.logger.error(requestBody, e.message);
       throw new ApiException(e.message, e.status);

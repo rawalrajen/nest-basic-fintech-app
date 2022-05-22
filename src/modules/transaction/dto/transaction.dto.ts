@@ -1,31 +1,20 @@
-import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { Expose, Type } from 'class-transformer';
+import { UserDto } from '../../user/dto/user.dto';
+
 export class TransactionDto {
-  @IsString()
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  @Expose()
+  id: number;
 
-  @IsString()
-  @IsNotEmpty()
-  name: string;
+  @Expose()
+  amount: number;
 
-  @IsEnum(['active', 'inactive'])
-  @IsOptional()
-  status: string;
+  @Expose()
+  action: string;
 
-  @IsOptional()
-  @IsDateString()
+  @Expose()
   created_at: string;
 
-  @IsOptional()
-  @IsDateString()
-  updated_at: string;
+  @Expose()
+  @Type(() => UserDto)
+  user: UserDto;
 }

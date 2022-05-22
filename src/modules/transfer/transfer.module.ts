@@ -16,7 +16,11 @@ import { TransactionRepository } from '../transaction/repositories/transaction.r
 @Module({
   imports: [
     AppLoggerModule,
-    TypeOrmModule.forFeature([TransferRepository, CommissionRepository, TransactionRepository]),
+    TypeOrmModule.forFeature([
+      TransferRepository,
+      CommissionRepository,
+      TransactionRepository,
+    ]),
     QueueModule,
     ConfigModule,
     TransactionModule,

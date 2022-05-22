@@ -1,31 +1,12 @@
-import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { Expose } from 'class-transformer';
+
 export class UserDto {
-  @IsString()
-  @IsNotEmpty()
-  @IsEmail()
+  @Expose()
   email: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @Expose()
   name: string;
 
-  @IsEnum(['active', 'inactive'])
-  @IsOptional()
-  status: string;
-
-  @IsOptional()
-  @IsDateString()
+  @Expose()
   created_at: string;
-
-  @IsOptional()
-  @IsDateString()
-  updated_at: string;
 }

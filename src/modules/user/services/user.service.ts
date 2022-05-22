@@ -1,12 +1,13 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
 import { Request } from 'express';
 import { AppLogger } from '../../../logger/logger.service';
 import { Between, Like } from 'typeorm';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { User } from '../user.entity';
 import { UserDto } from '../dto/user.dto';
 import { ApiException } from '../../../exceptions/api.exception';
+import { DeleteResult } from 'typeorm/browser';
 
 @Injectable()
 export class UserService {
@@ -17,7 +18,10 @@ export class UserService {
     this.logger.setContext(UserService.name);
   }
 
-  async getPaginatedUsers(request: Request, queries) {
+  async getPaginatedUsers(
+    request: Request,
+    queries,
+  ): Promise<{ data: UserDto[]; meta: any }> {
     const page = parseInt(queries.page, 10) || 1;
     const pageSize = parseInt(queries.pageSize, 10) || 10;
     const filterBody = await searchConditions(queries);
@@ -28,67 +32,66 @@ export class UserService {
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-    const data = {
+    const paginationData = {
       page,
       pageSize,
       count,
     };
-    const meta = await pagination(data);
-    return { users, meta };
+    const data = plainToInstance(UserDto, users, {
+      excludeExtraneousValues: true,
+    });
+    const meta = await pagination(paginationData);
+    return { data, meta };
   }
 
-  async find(request: Request, id: number): Promise<{ articles: any }> {
-    this.logger.log(request, `calling ${UserRepository.name}.findAndCount`);
-    const articles = await this.repository.getById(id);
-    return { articles };
+  async find(request: Request, id: number): Promise<UserDto> {
+    this.logger.log(request, `calling ${UserRepository.name}.getById`);
+    const user = await this.repository.getById(id);
+
+    return plainToInstance(UserDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  async store(body): Promise<{ article: any }> {
-    this.logger.log(body, `calling ${UserRepository.name}.findAndCount`);
+  async store(body): Promise<UserDto> {
+    this.logger.log(body, `calling ${UserRepository.name}.save`);
     try {
-      return await this.repository.save(body);
+      const user = await this.repository.save(body);
+
+      return plainToInstance(UserDto, user, {
+        excludeExtraneousValues: true,
+      });
     } catch (e) {
       this.logger.error(body, e.message);
-      throw new ApiException(e.message, 400);
+      throw new ApiException(e.message, e.status);
     }
   }
 
   async update(body, id): Promise<UserDto> {
-    this.logger.log(body, `calling ${UserRepository.name}.findAndCount`);
+    this.logger.log(body, `calling ${UserRepository.name}.getById`);
     const user = await this.repository.getById(id);
 
     if (!user) {
       throw new Error('User not found');
     }
-
     const updatedUser: User = {
       ...user,
       ...body,
     };
-
     await this.repository.save(updatedUser);
 
-    return plainToClass(UserDto, updatedUser, {
+    return plainToInstance(UserDto, updatedUser, {
       excludeExtraneousValues: true,
     });
   }
 
-  async destroy(id): Promise<{ article: any }> {
-    const user = await this.repository.delete(id);
-    return { article: user };
+  async destroy(id): Promise<DeleteResult> {
+    return await this.repository.delete(id);
   }
 }
 
 async function searchConditions(queries) {
   const data = {};
-
-  if (queries.keyword) {
-    data['subject'] = Like(`%${queries.keyword}%`);
-  }
-
-  if (queries.recipient_group) {
-    data['recipient_group'] = Like(`%${queries.recipient_group}%`);
-  }
 
   if (queries.status) {
     data['status'] = Like(`%${queries.status}%`);

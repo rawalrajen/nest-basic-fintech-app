@@ -37,7 +37,7 @@ export class TransferSubscriber implements EntitySubscriberInterface<Transfer> {
     const transaction = new Transaction();
     transaction.amount = event.entity.amount;
     transaction.type = TransactionType.OUT;
-    transaction.action = TransactionAction.WITHDRAW;
+    transaction.action = TransactionAction.TRANSFER;
     transaction.transfer = event.entity;
     transaction.user_id = event.entity.from_user_id;
 
@@ -49,7 +49,7 @@ export class TransferSubscriber implements EntitySubscriberInterface<Transfer> {
     const transaction = new Transaction();
     transaction.amount = event.entity.amount;
     transaction.type = TransactionType.IN;
-    transaction.action = TransactionAction.DEPOSIT;
+    transaction.action = TransactionAction.TRANSFER;
     transaction.transfer = event.entity;
     transaction.user_id = event.entity.to_user_id;
 

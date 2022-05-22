@@ -1,12 +1,12 @@
 import {
-  Body,
+  Body, ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
   ParseIntPipe,
   Post,
   Query,
-  Req,
+  Req, UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -15,6 +15,7 @@ import { Request } from 'express';
 import { TransactionCreateDto } from '../dto/transaction.create.dto';
 import { ConfigService } from '@nestjs/config';
 import { TransactionQueryDto } from '../dto/transaction.query.dto';
+import { TransactionDto } from '../dto/transaction.dto';
 
 @Controller()
 export class TransactionController {
@@ -24,17 +25,20 @@ export class TransactionController {
   ) {}
 
   @Get('transactions')
+  @UseInterceptors(ClassSerializerInterceptor)
   @UsePipes(new ValidationPipe({ transform: true }))
-  index(@Req() request: Request, @Query() queries: TransactionQueryDto) {
+  async index(@Req() request: Request, @Query() queries: TransactionQueryDto) {
     return this.transactionService.getPaginatedTransactions(request, queries);
   }
 
   @Get('transactions/:id')
-  findOne(
+  async findOne(
     @Req() request: Request,
     @Param('id', new ParseIntPipe()) id: number,
-  ): Promise<{ articles: any }> {
-    return this.transactionService.find(request, id);
+  ): Promise<{ data: TransactionDto }> {
+    const transaction = await this.transactionService.find(request, id);
+
+    return { data: transaction };
   }
 
   @Post('transactions')
