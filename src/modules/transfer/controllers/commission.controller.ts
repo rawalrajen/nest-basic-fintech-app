@@ -1,45 +1,36 @@
 import {
-  Body,
   Controller,
   Get,
   Param,
   ParseIntPipe,
-  Post,
   Query,
   Req,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { TransferService } from '../services/transfer.service';
 import { Request } from 'express';
-import { TransferCreateDto } from '../dto/transfer.create.dto';
 import { ConfigService } from '@nestjs/config';
 import { transferQueryDto } from '../dto/transfer.query.dto';
+import { CommissionService } from '../services/commission.service';
 
 @Controller()
-export class TransferController {
+export class CommissionController {
   constructor(
-    private readonly transferService: TransferService,
+    private readonly commissionService: CommissionService,
     private configService: ConfigService,
   ) {}
 
-  @Get('transfers')
+  @Get('commissions')
   @UsePipes(new ValidationPipe({ transform: true }))
   index(@Req() request: Request, @Query() queries: transferQueryDto) {
-    return this.transferService.getPaginatedtransfers(request, queries);
+    return this.commissionService.getPaginatedCommissions(request, queries);
   }
 
-  @Get('transfers/:id')
+  @Get('commissions/:id')
   findOne(
     @Req() request: Request,
     @Param('id', new ParseIntPipe()) id: number,
   ): Promise<{ articles: any }> {
-    return this.transferService.find(request, id);
-  }
-
-  @Post('transfers')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  create(@Body() body: TransferCreateDto): Promise<any> {
-    return this.transferService.store(body);
+    return this.commissionService.find(request, id);
   }
 }

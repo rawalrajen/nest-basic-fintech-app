@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { TransferRepository } from '../repositories/transfer.repository';
 import { Request } from 'express';
 import { AppLogger } from '../../../logger/logger.service';
 import { Between, Like } from 'typeorm';
 import { ApiException } from '../../../exceptions/api.exception';
-import { Transfer } from '../transfer.entity';
-import { COMMISSION_PERCENTAGE } from '../commission.entity';
+import { CommissionRepository } from '../repositories/commission.repository';
 
 @Injectable()
 export class CommissionService {
   constructor(
-    private repository: TransferRepository,
+    private repository: CommissionRepository,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext(CommissionService.name);
@@ -50,28 +48,11 @@ export class CommissionService {
     }
   }
 
-  async calcultateAndStore(transfer: Transfer): Promise<any> {
-    try {
-      const comissionAmount = transfer.amount * (COMMISSION_PERCENTAGE / 100);
-      const commisions = {
-        amount: comissionAmount,
-        transfer_id: transfer.id,
-      };
-      return await this.repository.save(commisions);
-    } catch (e) {
-      throw new ApiException(e.message, 400);
-    }
-  }
-
   async searchConditions(queries) {
     const data = {};
 
     if (queries.keyword) {
       data['amount'] = Like(`%${queries.keyword}%`);
-    }
-
-    if (queries.status) {
-      data['status'] = Like(`%${queries.status}%`);
     }
 
     if (queries.created_at_start && queries.created_at_end) {
