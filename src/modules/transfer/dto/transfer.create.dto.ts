@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, Validate } from 'class-validator';
+import { UserExistsRule } from '../../user/rules/userExist.rule';
 
 export class TransferCreateDto {
   @IsNotEmpty()
@@ -7,9 +8,11 @@ export class TransferCreateDto {
 
   @IsNotEmpty()
   @IsNumber()
+  @Validate(UserExistsRule)
   from_user_id: number;
 
   @IsNotEmpty()
   @IsNumber()
+  @Validate(UserExistsRule)
   to_user_id: number;
 }

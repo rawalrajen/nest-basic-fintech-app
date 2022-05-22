@@ -6,6 +6,7 @@ import { UserRepository } from './repositories/user.repository';
 import { AppLoggerModule } from '../../logger/logger.module';
 import { QueueModule } from '../../queue/queue.module';
 import { ConfigModule } from '@nestjs/config';
+import { UserExistsRule } from './rules/userExist.rule';
 
 @Module({
   imports: [
@@ -14,8 +15,8 @@ import { ConfigModule } from '@nestjs/config';
     QueueModule,
     ConfigModule,
   ],
-  providers: [UserService],
+  providers: [UserService, UserExistsRule],
   controllers: [UserController],
-  exports: [UserService],
+  exports: [UserService, UserExistsRule],
 })
 export class UserModule {}

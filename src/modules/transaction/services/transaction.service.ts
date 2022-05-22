@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { TransactionRepository } from '../repositories/transaction.repository';
 import { Request } from 'express';
 import { AppLogger } from '../../../logger/logger.service';
@@ -40,13 +40,14 @@ export class TransactionService {
     return { articles };
   }
 
-  async store(body): Promise<{ article: any }> {
+  async store(requestBody): Promise<{ article: any }> {
     try {
-      body.action = this.getTransactionAction(body.type);
-      return await this.repository.save(body);
+      await this.checkUserHasSufficientBalance(requestBody);
+      requestBody.action = this.getTransactionAction(requestBody.type);
+      return await this.repository.save(requestBody);
     } catch (e) {
-      this.logger.error(body, e.message);
-      throw new ApiException(e.message, 400);
+      this.logger.error(requestBody, e.message);
+      throw new ApiException(e.message, e.status);
     }
   }
 
@@ -82,6 +83,21 @@ export class TransactionService {
     };
   }
 
+  async checkUserHasSufficientBalance(requestBody) {
+    if (requestBody.type === TransactionType.OUT) {
+      const userBalance = await this.repository.getBalanceByUser(
+        requestBody.user_id,
+      );
+      if (requestBody.amount > userBalance) {
+        throw new ApiException(
+          'Not sufficient balance to withdraw',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+    return true;
+  }
+
   getTransactionAction(type) {
     if (type === TransactionType.IN) {
       return TransactionAction.DEPOSIT;
@@ -91,6 +107,6 @@ export class TransactionService {
       return TransactionAction.WITHDRAW;
     }
 
-    throw new ApiException('Invalid transaction type', 400);
+    throw new ApiException('Invalid transaction type', HttpStatus.BAD_REQUEST);
   }
 }

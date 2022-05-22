@@ -3,6 +3,7 @@ import {
   QueryRunner,
   Table,
   TableForeignKey,
+  TableIndex,
 } from 'typeorm';
 
 export class createTransactionsTable1653117850011
@@ -60,6 +61,13 @@ export class createTransactionsTable1653117850011
         columnNames: ['user_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'user',
+      }),
+    );
+
+    await queryRunner.createIndex(
+      'transaction',
+      new TableIndex({
+        columnNames: ['user_id'],
       }),
     );
   }
