@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
+import { Transfer } from '../transfer/transfer.entity';
 
 export enum TransactionAction {
   DEPOSIT = 'deposit',
@@ -26,7 +29,10 @@ export class Transaction {
   amount: number;
 
   @Column()
-  user_id: string;
+  user_id: number;
+
+  @Column()
+  transfer_id: number;
 
   @Column({
     type: 'enum',
@@ -47,4 +53,8 @@ export class Transaction {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @ManyToOne(() => Transfer, (transfer) => transfer.transactions)
+  @JoinColumn({ name: 'transfer_id' })
+  transfer: Transfer;
 }

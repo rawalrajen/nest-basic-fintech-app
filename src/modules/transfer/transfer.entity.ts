@@ -4,7 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  OneToMany,
 } from 'typeorm';
+import { Commission } from './commission.entity';
+import { Transaction } from '../transaction/transaction.entity';
 
 @Entity()
 export class Transfer {
@@ -25,4 +29,10 @@ export class Transfer {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToOne(() => Commission, (commission) => commission.transfer)
+  commission: Commission;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.transfer)
+  transactions: Transaction[];
 }

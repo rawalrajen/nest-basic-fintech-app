@@ -4,17 +4,19 @@ import { Request } from 'express';
 import { AppLogger } from '../../../logger/logger.service';
 import { Between, Like } from 'typeorm';
 import { ApiException } from '../../../exceptions/api.exception';
+import { Transfer } from '../transfer.entity';
+import { COMMISSION_PERCENTAGE } from '../commission.entity';
 
 @Injectable()
-export class TransferService {
+export class CommissionService {
   constructor(
     private repository: TransferRepository,
     private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(TransferService.name);
+    this.logger.setContext(CommissionService.name);
   }
 
-  async getPaginatedtransfers(request: Request, queries) {
+  async getPaginatedCommissions(request: Request, queries) {
     const page = parseInt(queries.page, 10) || 1;
     const pageSize = parseInt(queries.pageSize, 10) || 10;
     const filterBody = await this.searchConditions(queries);
@@ -39,12 +41,25 @@ export class TransferService {
     return { articles };
   }
 
-  async store(body): Promise<{ article: any }> {
+  async store(body): Promise<any> {
     try {
       return await this.repository.save(body);
     } catch (e) {
       this.logger.error(body, e.message);
-      throw new ApiException(e.message, e.code);
+      throw new ApiException(e.message, 400);
+    }
+  }
+
+  async calcultateAndStore(transfer: Transfer): Promise<any> {
+    try {
+      const comissionAmount = transfer.amount * (COMMISSION_PERCENTAGE / 100);
+      const commisions = {
+        amount: comissionAmount,
+        transfer_id: transfer.id,
+      };
+      return await this.repository.save(commisions);
+    } catch (e) {
+      throw new ApiException(e.message, 400);
     }
   }
 

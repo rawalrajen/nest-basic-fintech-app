@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { TransferService } from '../services/transfer.service';
 import { Request } from 'express';
-import { transferCreateDto } from '../dto/transfer.create.dto';
+import { TransferCreateDto } from '../dto/transfer.create.dto';
 import { ConfigService } from '@nestjs/config';
 import { transferQueryDto } from '../dto/transfer.query.dto';
 
@@ -39,7 +39,7 @@ export class transferController {
 
   @Post('transfers')
   @UsePipes(new ValidationPipe({ transform: true }))
-  create(@Body() body: transferCreateDto): Promise<any> {
+  create(@Body() body: TransferCreateDto): Promise<any> {
     return this.transferService.store(body);
   }
 }

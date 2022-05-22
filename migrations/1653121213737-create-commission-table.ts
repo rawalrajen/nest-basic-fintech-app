@@ -27,11 +27,6 @@ export class createCommissionTable1653121213737 implements MigrationInterface {
             type: 'int',
           },
           {
-            name: 'type',
-            type: 'enum',
-            enum: ['in', 'out'],
-          },
-          {
             name: 'created_at',
             type: 'timestamp',
             default: 'now()',

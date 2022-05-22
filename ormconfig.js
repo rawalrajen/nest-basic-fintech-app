@@ -6,6 +6,7 @@ module.exports = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE || 'newsletter',
   entities: [__dirname + '/src/**/*.entity{.ts,.js}'],
+  subscribers: [__dirname + '/src/**/*.subscriber{.ts,.js}'],
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
   migrationsRun: false,
   cli: {

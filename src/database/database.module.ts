@@ -15,6 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+        subscribers: [__dirname + '/../**/*.subscriber{.ts,.js}'],
         // Timezone configured on the MySQL server.
         // This is used to typecast server date/time values to JavaScript Date object and vice versa.
         timezone: 'Z',

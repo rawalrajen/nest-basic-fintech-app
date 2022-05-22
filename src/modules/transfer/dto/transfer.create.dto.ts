@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class transferCreateDto {
+export class TransferCreateDto {
   @IsNotEmpty()
   @IsNumber()
   amount: number;
